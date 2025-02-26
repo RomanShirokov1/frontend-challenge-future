@@ -5,18 +5,25 @@ import { Repository, RepositoryState } from '../../@types/types';
 const initialState: RepositoryState = {
   repositories: [],
   loading: false,
-  error: 'Список пуст',
+  error: 'Начните поиск.',
+  currentPage: 1,
+  username: '',
 };
 
 export const searchUserRepositories = createAsyncThunk(
   'repositories/searchUser ',
-  async ({ username, apiKey }: { username: string; apiKey: string }) => {
-    const response = await axios.get(`https://api.github.com/users/${username}/repos`, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
+  async ({ username, page }: { username: string; page: number }) => {
+    const apiKey = process.env.REACT_APP_GITHUB_API_KEY;
+    const response = await axios.get(
+      `https://api.github.com/users/${username}/repos?per_page=20&page=${page}`,
+      {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
       },
-    });
+    );
     return response.data.map((repo: any) => ({
+      id: repo.id,
       name: repo.name,
       html_url: repo.html_url,
       stargazers_count: repo.stargazers_count,
@@ -29,7 +36,21 @@ export const searchUserRepositories = createAsyncThunk(
 const repositorySlice = createSlice({
   name: 'repositories',
   initialState,
-  reducers: {},
+  reducers: {
+    resetRepositories: (state) => {
+      state.repositories = [];
+      state.error = 'Начните поиск.';
+      state.currentPage = 1;
+    },
+    incrementPage: (state) => {
+      state.currentPage += 1;
+    },
+    setUsername: (state, action) => {
+      state.username = action.payload;
+      state.currentPage = 1;
+      state.repositories = [];
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(searchUserRepositories.pending, (state) => {
@@ -38,7 +59,7 @@ const repositorySlice = createSlice({
       })
       .addCase(searchUserRepositories.fulfilled, (state, action) => {
         state.loading = false;
-        state.repositories = action.payload;
+        state.repositories = [...state.repositories, ...action.payload];
       })
       .addCase(searchUserRepositories.rejected, (state, action) => {
         state.loading = false;
@@ -47,4 +68,5 @@ const repositorySlice = createSlice({
   },
 });
 
+export const { resetRepositories, incrementPage, setUsername } = repositorySlice.actions;
 export default repositorySlice.reducer;

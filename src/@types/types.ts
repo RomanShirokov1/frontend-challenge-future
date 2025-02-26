@@ -11,4 +11,6 @@ export interface RepositoryState {
   repositories: Repository[];
   loading: boolean;
   error: string | null;
+  currentPage: number;
+  username: string;
 }

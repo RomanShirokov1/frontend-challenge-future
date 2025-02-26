@@ -1,21 +1,27 @@
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import styles from './SearchBar.module.scss';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../redux_tk/store';
+import {
+  resetRepositories,
+  searchUserRepositories,
+  setUsername,
+} from '../../redux_tk/slices/repositorySlice';
+import debounce from 'lodash.debounce';
 
-interface SearchBarProps {
-  onSearch: (username: string) => void;
-}
+const SearchBar: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-  const [username, setUsername] = useState('');
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUsername = e.target.value;
-    setUsername(newUsername);
-    onSearch(newUsername);
-  };
-  const onInputClear = () => {
-    setUsername('');
-  };
+  const handleSearch = useCallback(
+    debounce((value: string) => {
+      if (value) {
+        dispatch(setUsername(value));
+      } else {
+        dispatch(resetRepositories());
+      }
+    }, 400),
+    [dispatch],
+  );
 
   return (
     <div className={styles.searchBar}>
@@ -26,20 +32,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
         <input
           type="text"
           placeholder="Введите имя пользователя"
-          value={username}
           className={styles.input}
-          onChange={handleInputChange}
+          onChange={(e) => handleSearch(e.target.value)}
         />
-        {username && (
-          <svg
-            onClick={onInputClear}
-            className={styles.clear}
-            viewBox="0 0 48 48"
-            xmlns="http://www.w3.org/2000/svg">
-            <path d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z" />
-            <path d="M0 0h48v48h-48z" fill="none" />
-          </svg>
-        )}
       </div>
     </div>
   );

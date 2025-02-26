@@ -3,31 +3,58 @@ import ErrorMessage from './components/ErrorMessage';
 import Header from './components/Header';
 import RepositoryList from './components/RepositoryList';
 import { useDispatch, useSelector } from 'react-redux';
-import { searchUserRepositories } from './redux_tk/slices/repositorySlice';
 import { AppDispatch, RootState } from './redux_tk/store';
+import { useEffect, useRef } from 'react';
+import Skeleton from './components/Skeleton';
+import { incrementPage, searchUserRepositories } from './redux_tk/slices/repositorySlice';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
-  const { repositories, loading, error } = useSelector((state: RootState) => state.repositories);
+  const { repositories, loading, error, currentPage, username } = useSelector(
+    (state: RootState) => state.repositories,
+  );
+  const observerRef = useRef<HTMLDivElement | null>(null);
 
-  const handleSearch = (username: string) => {
-    const apiKey = process.env.REACT_APP_GITHUB_API_KEY;
-    if (username && apiKey) {
-      dispatch(searchUserRepositories({ username, apiKey }));
+  useEffect(() => {
+    if (username) {
+      dispatch(searchUserRepositories({ username, page: currentPage }));
     }
-  };
+  }, [username, currentPage, dispatch]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !loading) {
+          dispatch(incrementPage());
+        }
+      },
+      { threshold: 1.0 },
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current);
+      }
+    };
+  }, [loading, dispatch]);
 
   return (
     <div className="wrapper">
-      <Header onSearch={handleSearch} />
+      <Header />
       <div className="content">
-        {loading && <p>Загрузка...</p>}
         {error ? (
           <ErrorMessage message={error} />
         ) : repositories.length === 0 ? (
-          <ErrorMessage message="Список пуст." />
+          <ErrorMessage message="У пользователя нет репозиториев." />
         ) : (
-          <RepositoryList repositories={repositories} />
+          <>
+            <RepositoryList repositories={repositories} loading={loading} />
+            <div ref={observerRef} style={{ height: '20px' }} />
+          </>
         )}
       </div>
     </div>
