@@ -8,11 +8,23 @@
 
 .input {
   border: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 12px 20px;
-  padding-left: 42px;
+  padding: 12px 30px;
   width: 400px;
   border-radius: 10px;
   font-size: 16px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: 768px) {
+    width: 300px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 480px) {
+    width: 270px;
+    font-size: 12px;
+  }
 }
 
 .root {
@@ -23,9 +35,11 @@
   width: 22px;
   height: 22px;
   opacity: 0.3;
-  position: absolute;
-  top: 11px;
-  left: 13px;
+  position: absolute; // Позиционируем иконку абсолютно
+  top: 50%; // Центрируем по вертикали
+  left: 7px; // Позиция слева
+  transform: translateY(-50%);
+  z-index: 2;
 
   &:focus {
     border: 1px solid rgba(0, 0, 0, 0.2);

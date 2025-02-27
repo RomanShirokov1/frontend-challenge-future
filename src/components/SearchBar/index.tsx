@@ -2,11 +2,7 @@ import React, { useCallback } from 'react';
 import styles from './SearchBar.module.scss';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../redux_tk/store';
-import {
-  resetRepositories,
-  searchUserRepositories,
-  setUsername,
-} from '../../redux_tk/slices/repositorySlice';
+import { resetRepositories, setUsername } from '../../redux_tk/slices/repositorySlice';
 import debounce from 'lodash.debounce';
 
 const SearchBar: React.FC = () => {

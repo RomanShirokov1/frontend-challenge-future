@@ -19,7 +19,7 @@ const RepositoryCard: React.FC<RepositoryCardProps> = ({
 }) => {
   return (
     <div className={styles.repositoryCard}>
-      <h2 className={styles.repositoryName}>
+      <h2 className={styles.repositoryName} data-testid="repository-name">
         <a className={styles.repositoryLink} href={html_url}>
           {name}
         </a>

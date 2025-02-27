@@ -5,12 +5,11 @@ import RepositoryList from './components/RepositoryList';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from './redux_tk/store';
 import { useEffect, useRef } from 'react';
-import Skeleton from './components/Skeleton';
 import { incrementPage, searchUserRepositories } from './redux_tk/slices/repositorySlice';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
-  const { repositories, loading, error, currentPage, username } = useSelector(
+  const { repositories, loading, error, currentPage, username, hasMore } = useSelector(
     (state: RootState) => state.repositories,
   );
   const observerRef = useRef<HTMLDivElement | null>(null);
@@ -24,7 +23,8 @@ function App() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !loading) {
+        if (entry.isIntersecting && !loading && hasMore) {
+          // Проверяем hasMore
           dispatch(incrementPage());
         }
       },
@@ -40,13 +40,15 @@ function App() {
         observer.unobserve(observerRef.current);
       }
     };
-  }, [loading, dispatch]);
+  }, [loading, dispatch, hasMore]);
 
   return (
     <div className="wrapper">
       <Header />
       <div className="content">
-        {error ? (
+        {loading ? (
+          <RepositoryList loading={loading} repositories={repositories} />
+        ) : error ? (
           <ErrorMessage message={error} />
         ) : repositories.length === 0 ? (
           <ErrorMessage message="У пользователя нет репозиториев." />

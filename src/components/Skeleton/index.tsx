@@ -10,7 +10,7 @@ const MyLoader: React.FC = (props) => (
     backgroundColor="#f3f3f3"
     foregroundColor="#ecebeb"
     {...props}>
-    <rect x="0" y="0" rx="8" ry="8" width="330" height="200" />
+    <rect x="0" y="0" rx="8" ry="8" width="300" height="200" />
   </ContentLoader>
 );
 

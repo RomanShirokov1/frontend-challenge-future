@@ -13,4 +13,5 @@ export interface RepositoryState {
   error: string | null;
   currentPage: number;
   username: string;
+  hasMore: boolean;
 }
